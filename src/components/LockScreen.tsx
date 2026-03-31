@@ -1,10 +1,11 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Lock, LockOpen } from 'lucide-react'
-import { useCallback, useRef, useState } from 'react'
+import { type RefObject, useCallback, useRef, useState } from 'react'
 import { PASSCODE, PIN_DIGIT_COUNT } from '../lib/constants'
 
 type Props = {
   onUnlock: () => void
+  musicRef: RefObject<HTMLAudioElement | null>
 }
 
 const shake = {
@@ -12,7 +13,7 @@ const shake = {
   transition: { duration: 0.45 },
 }
 
-export function LockScreen({ onUnlock }: Props) {
+export function LockScreen({ onUnlock, musicRef }: Props) {
   const [digits, setDigits] = useState<string[]>(() =>
     Array(PIN_DIGIT_COUNT).fill(''),
   )
@@ -25,6 +26,7 @@ export function LockScreen({ onUnlock }: Props) {
       const code = next.join('')
       if (code.length !== PIN_DIGIT_COUNT) return
       if (code === PASSCODE) {
+        void musicRef.current?.play().catch(() => {})
         setUnlocked(true)
         window.setTimeout(onUnlock, 700)
       } else {
@@ -34,7 +36,7 @@ export function LockScreen({ onUnlock }: Props) {
         window.setTimeout(() => setError(false), 600)
       }
     },
-    [onUnlock],
+    [musicRef, onUnlock],
   )
 
   const handleChange = (index: number, raw: string) => {

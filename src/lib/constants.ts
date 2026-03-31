@@ -1,5 +1,6 @@
 /** Reunion: 18 Sep 2026, 00:00:00 in Asia/Ho_Chi_Minh (UTC+7) */
 export const REUNION_TARGET_MS = Date.parse('2026-09-17T17:00:00.000Z')
+// export const REUNION_TARGET_MS = Date.parse('2020-01-01T00:00:00.000Z')
 
 /** Journey bar: 1 Jan 2026 → reunion (Vietnam local midnight starts) */
 export const JOURNEY_START_MS = Date.parse('2025-12-31T17:00:00.000Z')
