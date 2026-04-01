@@ -1,9 +1,13 @@
 import { motion } from 'framer-motion'
+import { lazy, Suspense } from 'react'
 import { CountdownUnit } from './CountdownUnit'
 import { DualClocks } from './DualClocks'
 import { JourneyProgress } from './JourneyProgress'
-import { ReunionCelebration } from './ReunionCelebration'
 import { SurpriseButton } from './SurpriseButton'
+
+const ReunionCelebration = lazy(() =>
+  import('./ReunionCelebration').then((m) => ({ default: m.ReunionCelebration })),
+)
 import { useCountdown } from '../hooks/useCountdown'
 import { REUNION_TARGET_MS } from '../lib/constants'
 
@@ -34,7 +38,16 @@ export function Dashboard() {
       )}
 
       {arrived ? (
-        <ReunionCelebration />
+        <Suspense
+          fallback={
+            <div
+              className="h-48 w-full max-w-lg animate-pulse rounded-3xl bg-white/25"
+              aria-hidden
+            />
+          }
+        >
+          <ReunionCelebration />
+        </Suspense>
       ) : (
         <div className="flex w-full max-w-4xl flex-wrap items-stretch justify-center gap-3 sm:gap-4">
           <CountdownUnit value={cd.days} label="Ngày" pad={2} />

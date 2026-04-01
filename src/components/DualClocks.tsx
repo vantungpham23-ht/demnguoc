@@ -33,13 +33,9 @@ export function DualClocks() {
               <span className="font-display text-sm font-semibold text-[#5c3d48] sm:text-base">
                 {z.label}
               </span>
-              <motion.span
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/50 text-[#c97b8a]"
-                animate={{ rotate: day ? [0, 8, 0] : [0, -6, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-              >
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/50 text-[#c97b8a]">
                 <Icon className="h-5 w-5" strokeWidth={2} />
-              </motion.span>
+              </span>
             </div>
             <p className="font-mono text-2xl font-semibold tabular-nums text-[#3a2a32] sm:text-3xl">
               {formatTimeInZone(now, z.timeZone)}

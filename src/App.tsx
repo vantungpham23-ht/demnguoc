@@ -1,9 +1,14 @@
 import { AnimatePresence } from 'framer-motion'
-import { useCallback, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useRef, useState } from 'react'
 import { AnimatedMeshBackground } from './components/AnimatedMeshBackground'
-import { Dashboard } from './components/Dashboard'
 import { LoadingScreen } from './components/LoadingScreen'
-import { LockScreen } from './components/LockScreen'
+
+const LockScreen = lazy(() =>
+  import('./components/LockScreen').then((m) => ({ default: m.LockScreen })),
+)
+const Dashboard = lazy(() =>
+  import('./components/Dashboard').then((m) => ({ default: m.Dashboard })),
+)
 
 type Phase = 'loading' | 'auth' | 'dashboard'
 
@@ -20,7 +25,7 @@ export default function App() {
         ref={musicRef}
         src={`${import.meta.env.BASE_URL}music.mp3`}
         loop
-        preload="auto"
+        preload="metadata"
         className="sr-only"
         aria-hidden
       />
@@ -33,12 +38,16 @@ export default function App() {
       </AnimatePresence>
 
       {phase !== 'loading' && (
-        <AnimatePresence mode="wait">
-          {phase === 'auth' && (
-            <LockScreen key="lock" musicRef={musicRef} onUnlock={unlock} />
-          )}
-          {phase === 'dashboard' && <Dashboard key="dash" />}
-        </AnimatePresence>
+        <Suspense
+          fallback={<div className="min-h-svh w-full" aria-hidden />}
+        >
+          <AnimatePresence mode="wait">
+            {phase === 'auth' && (
+              <LockScreen key="lock" musicRef={musicRef} onUnlock={unlock} />
+            )}
+            {phase === 'dashboard' && <Dashboard key="dash" />}
+          </AnimatePresence>
+        </Suspense>
       )}
     </div>
   )

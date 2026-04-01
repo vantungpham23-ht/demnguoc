@@ -29,12 +29,19 @@ export function useCountdown(targetMs: number): CountdownParts {
 
   useEffect(() => {
     const tick = () => setNow(Date.now())
-    const id = window.setInterval(tick, 250)
-    return () => window.clearInterval(id)
+    tick()
+    const msIntoSecond = Date.now() % 1000
+    const msToNextSecond = msIntoSecond === 0 ? 0 : 1000 - msIntoSecond
+    let intervalId: ReturnType<typeof setInterval> | undefined
+    const timeoutId = window.setTimeout(() => {
+      tick()
+      intervalId = window.setInterval(tick, 1000)
+    }, msToNextSecond)
+    return () => {
+      window.clearTimeout(timeoutId)
+      if (intervalId !== undefined) window.clearInterval(intervalId)
+    }
   }, [])
 
-  return useMemo(
-    () => split(targetMs - now),
-    [targetMs, now],
-  )
+  return useMemo(() => split(targetMs - now), [targetMs, now])
 }

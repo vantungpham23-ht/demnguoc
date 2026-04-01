@@ -1,11 +1,11 @@
-import confetti from 'canvas-confetti'
 import { motion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
 import { useCallback, useState } from 'react'
 
 type Heart = { id: number; x: number; delay: number; duration: number; rotate: number }
 
-function burst() {
+async function burst() {
+  const { default: confetti } = await import('canvas-confetti')
   const pink = ['#ffd1dc', '#ff8fa3', '#e8b4bc', '#fff0f5', '#fadadd']
   const count = 120
   const defaults = { spread: 70, ticks: 200, gravity: 0.65, decay: 0.92 }
@@ -41,7 +41,7 @@ export function SurpriseButton() {
   const [hearts, setHearts] = useState<Heart[]>([])
 
   const handleClick = useCallback(() => {
-    burst()
+    void burst()
     setHearts((h) => [...h, ...randomHearts(28)])
     window.setTimeout(() => {
       setHearts([])

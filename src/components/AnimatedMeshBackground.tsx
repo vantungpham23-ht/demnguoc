@@ -73,18 +73,16 @@ const ROWS = 12
 const STARS_FAR = buildDenseField(COLS, ROWS, 2, [1, 2.2], 0, 0)
 const STARS_MID = buildDenseField(COLS, ROWS, 17, [1.1, 2.5], 0.5, 0.33)
 const STARS_NEAR = buildDenseField(COLS, ROWS, 31, [1.4, 3.2], 0.33, 0.5)
-const STARS_DUST_FAR = buildLowerDust(70, 71, [0.9, 1.6])
-const STARS_DUST_NEAR = buildLowerDust(60, 89, [1.1, 2])
+/** Một lớp bụi (gộp hai lớp cũ) — ít lớp xoay = nhẹ CPU/GPU hơn */
+const STARS_DUST = buildLowerDust(95, 71, [0.95, 1.85])
 
 function StarLayer({
   stars,
   durationSec,
-  blurPx,
   subtleGlow,
 }: {
   stars: StarSpec[]
   durationSec: number
-  blurPx: number
   subtleGlow?: boolean
 }) {
   return (
@@ -93,14 +91,12 @@ function StarLayer({
       style={
         {
           ['--galaxy-spin' as string]: `${durationSec}s`,
-          filter: blurPx > 0 ? `blur(${blurPx}px)` : undefined,
         } as CSSProperties
       }
     >
       {stars.map((s, i) => {
-        const glow = subtleGlow
-          ? `0 0 ${s.size * 2}px ${s.size * 0.4}px rgba(255,255,255,${0.65 * s.glow}), 0 0 1px rgba(255,255,255,0.85)`
-          : `0 0 ${s.size * 2.8}px ${s.size * 0.75}px rgba(255,255,255,${0.85 * s.glow}), 0 0 ${s.size * 5}px ${s.size * 1.2}px rgba(255,248,252,${0.55 * s.glow}), 0 0 1px rgba(255,255,255,0.9)`
+        const a = subtleGlow ? 0.55 : 0.72
+        const glow = `0 0 ${Math.ceil(s.size * 2.2)}px ${Math.ceil(s.size * 0.5)}px rgba(255,255,255,${a * s.glow})`
         return (
           <span
             key={i}
@@ -112,7 +108,6 @@ function StarLayer({
               height: s.size,
               marginLeft: -s.size / 2,
               marginTop: -s.size / 2,
-              opacity: subtleGlow ? 0.78 : 0.88,
               boxShadow: glow,
               animation: `star-twinkle ${s.duration}s ease-in-out infinite`,
               animationDelay: `${s.delay}s`,
@@ -148,11 +143,10 @@ export function AnimatedMeshBackground() {
 
       {/* Rotating star fields (clockwise, parallax) — on top of wash */}
       <div className="absolute inset-0">
-        <StarLayer stars={STARS_FAR} durationSec={110} blurPx={0.45} />
-        <StarLayer stars={STARS_DUST_FAR} durationSec={125} blurPx={0.35} subtleGlow />
-        <StarLayer stars={STARS_MID} durationSec={72} blurPx={0} />
-        <StarLayer stars={STARS_NEAR} durationSec={46} blurPx={0} />
-        <StarLayer stars={STARS_DUST_NEAR} durationSec={52} blurPx={0} subtleGlow />
+        <StarLayer stars={STARS_FAR} durationSec={110} />
+        <StarLayer stars={STARS_MID} durationSec={72} />
+        <StarLayer stars={STARS_NEAR} durationSec={46} />
+        <StarLayer stars={STARS_DUST} durationSec={90} subtleGlow />
       </div>
 
       {/* Light veil: keeps UI readable without hiding stars */}
@@ -185,8 +179,8 @@ export function AnimatedMeshBackground() {
         }
 
         @keyframes nebula-breathe {
-          0% { filter: hue-rotate(-8deg) saturate(1.05) brightness(0.98); transform: scale(1) translate(0, 0); }
-          100% { filter: hue-rotate(10deg) saturate(1.2) brightness(1.08); transform: scale(1.06) translate(1%, -1%); }
+          0% { transform: scale(1) translate(0, 0); }
+          100% { transform: scale(1.05) translate(1%, -1%); }
         }
 
         @keyframes drift-a {
@@ -217,29 +211,19 @@ export function AnimatedMeshBackground() {
           transform-origin: 50% 50%;
           animation: galaxy-spin-cw var(--galaxy-spin, 200s) linear infinite;
           will-change: transform;
+          contain: layout style paint;
         }
 
         @keyframes galaxy-spin-cw {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from { transform: rotate(0deg) translateZ(0); }
+          to { transform: rotate(360deg) translateZ(0); }
         }
 
+        /* Chỉ đổi opacity — tránh scale/filter trên hàng trăm node (mượt mobile) */
         @keyframes star-twinkle {
-          0%, 100% {
-            opacity: 0.55;
-            transform: scale(1);
-            filter: brightness(1);
-          }
-          35% {
-            opacity: 1;
-            transform: scale(1.4);
-            filter: brightness(1.25);
-          }
-          55% {
-            opacity: 0.72;
-            transform: scale(1.12);
-            filter: brightness(1.1);
-          }
+          0%, 100% { opacity: 0.45; }
+          40% { opacity: 1; }
+          65% { opacity: 0.65; }
         }
 
         .mesh-gradient {
