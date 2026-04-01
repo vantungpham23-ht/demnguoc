@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import type { CSSProperties } from 'react'
 
 /** Deterministic pseudo-random in [0, 1) */
@@ -67,22 +66,15 @@ function buildLowerDust(
   }))
 }
 
-const COLS = 22
-const ROWS = 17
+/** ~½ số sao so với bản đặc (nhẹ hơn trên mobile) */
+const COLS = 15
+const ROWS = 12
 
 const STARS_FAR = buildDenseField(COLS, ROWS, 2, [1, 2.2], 0, 0)
 const STARS_MID = buildDenseField(COLS, ROWS, 17, [1.1, 2.5], 0.5, 0.33)
 const STARS_NEAR = buildDenseField(COLS, ROWS, 31, [1.4, 3.2], 0.33, 0.5)
-const STARS_DUST_FAR = buildLowerDust(140, 71, [0.9, 1.6])
-const STARS_DUST_NEAR = buildLowerDust(120, 89, [1.1, 2])
-
-const hearts = Array.from({ length: 10 }, (_, i) => ({
-  id: i,
-  x: (i * 73) % 100,
-  delay: i * 0.45,
-  duration: 14 + (i % 5) * 2.2,
-  scale: 0.35 + (i % 4) * 0.12,
-}))
+const STARS_DUST_FAR = buildLowerDust(70, 71, [0.9, 1.6])
+const STARS_DUST_NEAR = buildLowerDust(60, 89, [1.1, 2])
 
 function StarLayer({
   stars,
@@ -165,33 +157,6 @@ export function AnimatedMeshBackground() {
 
       {/* Light veil: keeps UI readable without hiding stars */}
       <div className="mesh-veil absolute inset-0" aria-hidden />
-
-      {/* Floating hearts — non-rotating */}
-      {hearts.map((h) => (
-        <motion.span
-          key={h.id}
-          className="absolute text-[#ffd1dc]/30"
-          style={{
-            left: `${h.x}%`,
-            bottom: '-8%',
-            fontSize: `${1.15 * h.scale}rem`,
-          }}
-          initial={{ y: 0, opacity: 0.15, rotate: 0 }}
-          animate={{
-            y: ['0vh', '-120vh'],
-            opacity: [0.12, 0.38, 0.15],
-            rotate: [0, 10, -6, 0],
-          }}
-          transition={{
-            duration: h.duration,
-            repeat: Infinity,
-            ease: 'linear',
-            delay: h.delay,
-          }}
-        >
-          ❤
-        </motion.span>
-      ))}
 
       <style>{`
         .nebula-base {
